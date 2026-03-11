@@ -32,10 +32,18 @@ settings = get_settings()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Ciclo de vida da aplicação."""
+    """Ciclo de vida da aplicação (resiliente a falhas de DB/Redis)."""
     logger.info("application_starting", app=settings.app_name)
-    await init_db()
-    await init_redis()
+    try:
+        await init_db()
+        logger.info("database_initialized")
+    except Exception as e:
+        logger.error("database_init_failed", error=str(e), exc_info=True)
+    try:
+        await init_redis()
+        logger.info("redis_initialized")
+    except Exception as e:
+        logger.error("redis_init_failed", error=str(e), exc_info=True)
     yield
     await close_redis()
     logger.info("application_shutting_down")
