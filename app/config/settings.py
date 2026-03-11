@@ -1,8 +1,23 @@
 """Configurações centralizadas da aplicação."""
 
+import os
 from functools import lru_cache
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+def _to_async_pg_url(url: str) -> str:
+    """Converte URL PostgreSQL para driver asyncpg."""
+    if url.startswith("postgresql://"):
+        return "postgresql+asyncpg://" + url[12:]
+    if url.startswith("postgres://"):
+        return "postgresql+asyncpg://" + url[10:]
+    return url
+
+
+def _to_sync_pg_url(url: str) -> str:
+    """Converte URL PostgreSQL para formato síncrono."""
+    return url.replace("postgresql+asyncpg://", "postgresql://")
 
 
 class Settings(BaseSettings):
@@ -36,6 +51,9 @@ class Settings(BaseSettings):
             return "sqlite:///./test.db"
         if self.use_sqlite:
             return "sqlite:///./breach_dev.db"
+        env_url = os.environ.get("DATABASE_URL")
+        if env_url:
+            return _to_sync_pg_url(env_url)
         return (
             f"postgresql://{self.postgres_user}:{self.postgres_password}"
             f"@{self.postgres_host}:{self.postgres_port}/{self.postgres_db}"
@@ -43,11 +61,14 @@ class Settings(BaseSettings):
 
     @property
     def async_database_url(self) -> str:
-        """URL de conexão assíncrona."""
+        """URL de conexão assíncrona (postgresql+asyncpg para produção)."""
         if self.testing:
             return "sqlite+aiosqlite:///./test.db"
         if self.use_sqlite:
             return "sqlite+aiosqlite:///./breach_dev.db"
+        env_url = os.environ.get("DATABASE_URL")
+        if env_url:
+            return _to_async_pg_url(env_url)
         return (
             f"postgresql+asyncpg://{self.postgres_user}:{self.postgres_password}"
             f"@{self.postgres_host}:{self.postgres_port}/{self.postgres_db}"
@@ -61,7 +82,10 @@ class Settings(BaseSettings):
 
     @property
     def redis_url(self) -> str:
-        """URL de conexão Redis."""
+        """URL de conexão Redis (usa REDIS_URL se definido, ex: Render)."""
+        env_url = os.environ.get("REDIS_URL")
+        if env_url:
+            return env_url
         auth = f":{self.redis_password}@" if self.redis_password else ""
         return f"redis://{auth}{self.redis_host}:{self.redis_port}/{self.redis_db}"
 
