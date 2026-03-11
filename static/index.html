@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Breach Intelligence Platform</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Outfit:wght@300;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --text-muted: #8b949e;
+      --accent: #58a6ff;
+      --success: #3fb950;
+      --warning: #d29922;
+      --danger: #f85149;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 560px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(135deg, var(--text) 0%, var(--text-muted) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      font-weight: 300;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    label {
+      display: block;
+      font-size: 0.95rem;
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+      color: var(--text-muted);
+    }
+
+    input[type="email"],
+    input[type="password"] {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      font-size: 1rem;
+      font-family: 'JetBrains Mono', monospace;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      transition: border-color 0.2s;
+    }
+
+    input[type="email"]:focus,
+    input[type="password"]:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    input[type="email"]::placeholder,
+    input[type="password"]::placeholder {
+      color: var(--text-muted);
+      opacity: 0.7;
+    }
+
+    button {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      font-size: 1rem;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 600;
+      background: var(--accent);
+      color: var(--bg);
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .hint {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 1rem;
+    }
+
+    .hint code {
+      font-family: 'JetBrains Mono', monospace;
+      background: var(--bg);
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      font-size: 0.8rem;
+    }
+
+    .result {
+      display: none;
+    }
+
+    .result.visible {
+      display: block;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      margin-bottom: 1rem;
+    }
+
+    .status-badge.safe {
+      background: rgba(63, 185, 80, 0.15);
+      color: var(--success);
+    }
+
+    .status-badge.low {
+      background: rgba(210, 153, 34, 0.15);
+      color: var(--warning);
+    }
+
+    .status-badge.medium {
+      background: rgba(210, 153, 34, 0.2);
+      color: #e3b341;
+    }
+
+    .status-badge.high {
+      background: rgba(248, 81, 73, 0.15);
+      color: var(--danger);
+    }
+
+    .status-badge .icon {
+      font-size: 1.2rem;
+    }
+
+    .result-email {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+    }
+
+    .breaches-list {
+      list-style: none;
+    }
+
+    .breaches-list li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.6rem 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.95rem;
+    }
+
+    .breaches-list li:last-child {
+      border-bottom: none;
+    }
+
+    .breach-name {
+      font-weight: 500;
+    }
+
+    .breach-year {
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+
+    .no-breaches {
+      color: var(--success);
+      font-size: 0.95rem;
+      padding: 0.5rem 0;
+    }
+
+    .error-msg {
+      background: rgba(248, 81, 73, 0.1);
+      border: 1px solid rgba(248, 81, 73, 0.3);
+      color: var(--danger);
+      padding: 1rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 1.5rem;
+      color: var(--text-muted);
+    }
+
+    .loading::after {
+      content: '';
+      animation: dots 1.5s infinite;
+    }
+
+    @keyframes dots {
+      0%, 20% { content: '.'; }
+      40% { content: '..'; }
+      60%, 100% { content: '...'; }
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 2rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+    }
+
+    footer a {
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Breach Intelligence Platform</h1>
+      <p class="subtitle">Verifique se seu email ou senha apareceu em vazamentos de dados</p>
+    </header>
+
+    <div class="card">
+      <form id="checkForm">
+        <div class="form-group">
+          <label for="email">Endereço de email</label>
+          <input type="email" id="email" name="email" placeholder="seu@email.com" required autocomplete="email">
+        </div>
+        <button type="submit" id="submitBtn">Verificar email</button>
+      </form>
+
+      <p class="hint">
+        Para testar: <code>admin@demo.com</code> ou <code>test@demo.com</code> (dados simulados)
+      </p>
+    </div>
+
+    <div class="card">
+      <form id="passwordForm">
+        <div class="form-group">
+          <label for="password">Senha</label>
+          <input type="password" id="password" name="password" placeholder="Digite a senha para verificar" autocomplete="off">
+        </div>
+        <button type="submit" id="passwordBtn">Verificar senha</button>
+      </form>
+
+      <p class="hint">
+        Usa k-anonymity (a senha nunca é enviada). Ex: <code>password123</code> ou <code>123456</code> costumam estar vazadas.
+      </p>
+    </div>
+
+    <div class="card result" id="resultCard">
+      <div id="errorMsg" class="error-msg" style="display: none;"></div>
+      <div id="loading" class="loading" style="display: none;">Consultando</div>
+      <div id="resultContent" style="display: none;">
+        <div id="statusBadge" class="status-badge"></div>
+        <p class="result-email" id="resultEmail"></p>
+        <div id="breachesContainer"></div>
+      </div>
+      <div id="passwordResultContent" style="display: none;">
+        <div id="passwordStatusBadge" class="status-badge"></div>
+        <p class="result-email" id="passwordCount"></p>
+      </div>
+    </div>
+
+    <footer>
+      <a href="/docs">Documentação da API</a> ·
+      <a href="https://haveibeenpwned.com" target="_blank" rel="noopener">Have I Been Pwned</a> ·
+      <a href="https://leakcheck.io" target="_blank" rel="noopener">Powered by LeakCheck</a>
+    </footer>
+  </div>
+
+  <script>
+    const form = document.getElementById('checkForm');
+    const emailInput = document.getElementById('email');
+    const submitBtn = document.getElementById('submitBtn');
+    const resultCard = document.getElementById('resultCard');
+    const errorMsg = document.getElementById('errorMsg');
+    const loading = document.getElementById('loading');
+    const resultContent = document.getElementById('resultContent');
+    const statusBadge = document.getElementById('statusBadge');
+    const resultEmail = document.getElementById('resultEmail');
+    const breachesContainer = document.getElementById('breachesContainer');
+
+    const riskLabels = {
+      safe: { text: 'Seguro', icon: '✓', class: 'safe' },
+      low: { text: 'Risco Baixo', icon: '!', class: 'low' },
+      medium: { text: 'Risco Médio', icon: '⚠', class: 'medium' },
+      high: { text: 'Risco Alto', icon: '⚠', class: 'high' }
+    };
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = emailInput.value.trim();
+      if (!email) return;
+
+      resultCard.classList.add('visible');
+      errorMsg.style.display = 'none';
+      resultContent.style.display = 'none';
+      document.getElementById('passwordResultContent').style.display = 'none';
+      loading.style.display = 'block';
+      submitBtn.disabled = true;
+
+      try {
+        const res = await fetch('/breach-check', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          let msg = 'Erro ao consultar';
+          if (Array.isArray(data.detail)) {
+            msg = data.detail.map(d => d.msg || d.message).join('; ') || msg;
+          } else if (typeof data.detail === 'string') {
+            msg = data.detail;
+          } else if (data.detail?.msg) {
+            msg = data.detail.msg;
+          }
+          throw new Error(msg);
+        }
+
+        loading.style.display = 'none';
+        resultContent.style.display = 'block';
+
+        const risk = riskLabels[data.risk_score] || riskLabels.safe;
+        statusBadge.className = `status-badge ${risk.class}`;
+        statusBadge.innerHTML = `<span class="icon">${risk.icon}</span> ${risk.text} · ${data.breach_count} vazamento(s)`;
+
+        resultEmail.textContent = data.email;
+
+        if (data.breaches && data.breaches.length > 0) {
+          breachesContainer.innerHTML = `
+            <ul class="breaches-list">
+              ${data.breaches.map(b => `
+                <li>
+                  <span class="breach-name">${escapeHtml(b.name)}</span>
+                  <span class="breach-year">${b.year || '—'}</span>
+                </li>
+              `).join('')}
+            </ul>
+          `;
+        } else {
+          breachesContainer.innerHTML = '<p class="no-breaches">Nenhum vazamento encontrado para este email.</p>';
+        }
+      } catch (err) {
+        loading.style.display = 'none';
+        errorMsg.style.display = 'block';
+        errorMsg.textContent = err.message || 'Erro ao conectar com a API. Verifique se o servidor está rodando.';
+      } finally {
+        submitBtn.disabled = false;
+      }
+    });
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    const passwordForm = document.getElementById('passwordForm');
+    const passwordInput = document.getElementById('password');
+    const passwordBtn = document.getElementById('passwordBtn');
+    const passwordResultContent = document.getElementById('passwordResultContent');
+    const passwordStatusBadge = document.getElementById('passwordStatusBadge');
+    const passwordCount = document.getElementById('passwordCount');
+
+    passwordForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const password = passwordInput.value;
+      if (!password) return;
+
+      resultCard.classList.add('visible');
+      errorMsg.style.display = 'none';
+      resultContent.style.display = 'none';
+      passwordResultContent.style.display = 'none';
+      loading.style.display = 'block';
+      passwordBtn.disabled = true;
+
+      try {
+        const res = await fetch('/password-check', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          let msg = 'Erro ao consultar';
+          if (Array.isArray(data.detail)) {
+            msg = data.detail.map(d => d.msg || d.message).join('; ') || msg;
+          } else if (typeof data.detail === 'string') {
+            msg = data.detail;
+          } else if (data.detail?.msg) {
+            msg = data.detail.msg;
+          }
+          throw new Error(msg);
+        }
+
+        loading.style.display = 'none';
+        passwordResultContent.style.display = 'block';
+
+        if (data.pwned) {
+          passwordStatusBadge.className = 'status-badge high';
+          passwordStatusBadge.innerHTML = '<span class="icon">⚠</span> Senha vazada';
+          passwordCount.textContent = `Esta senha apareceu ${data.count.toLocaleString('pt-BR')} vez(es) em vazamentos. Troque imediatamente!`;
+        } else {
+          passwordStatusBadge.className = 'status-badge safe';
+          passwordStatusBadge.innerHTML = '<span class="icon">✓</span> Senha segura';
+          passwordCount.textContent = 'Não encontrada em vazamentos conhecidos.';
+        }
+      } catch (err) {
+        loading.style.display = 'none';
+        errorMsg.style.display = 'block';
+        errorMsg.textContent = err.message || 'Erro ao conectar com a API.';
+      } finally {
+        passwordBtn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>

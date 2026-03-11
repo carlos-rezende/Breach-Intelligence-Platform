@@ -1,0 +1,47 @@
+"""Segurança - JWT, hash de senhas."""
+
+from datetime import UTC, datetime, timedelta
+
+import bcrypt
+from jose import JWTError, jwt
+
+from app.config import get_settings
+
+settings = get_settings()
+
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    """Verifica se a senha corresponde ao hash."""
+    return bcrypt.checkpw(
+        plain_password.encode("utf-8"),
+        hashed_password.encode("utf-8"),
+    )
+
+
+def get_password_hash(password: str) -> str:
+    """Gera hash da senha."""
+    return bcrypt.hashpw(
+        password.encode("utf-8"),
+        bcrypt.gensalt(),
+    ).decode("utf-8")
+
+
+def create_access_token(data: dict, expires_delta: timedelta | None = None) -> str:
+    """Cria token JWT."""
+    to_encode = data.copy()
+    expire = datetime.now(UTC) + (
+        expires_delta or timedelta(minutes=settings.access_token_expire_minutes)
+    )
+    to_encode.update({"exp": expire})
+    return jwt.encode(to_encode, settings.secret_key, algorithm=settings.algorithm)
+
+
+def decode_access_token(token: str) -> dict | None:
+    """Decodifica e valida token JWT."""
+    try:
+        payload = jwt.decode(
+            token, settings.secret_key, algorithms=[settings.algorithm]
+        )
+        return payload
+    except JWTError:
+        return None
