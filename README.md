@@ -301,13 +301,3 @@ Para consultar vazamentos reais de qualquer email:
 ```bash
 TESTING=1 pytest tests/ -v
 ```
-
-## Publicação no GitHub
-
-1. Crie o repositório e substitua `YOUR_USERNAME/REPO_NAME` nos badges do README
-2. Adicione um screenshot da interface em `docs/screenshot.png` (opcional)
-3. Configure as variáveis de ambiente no Render (PostgreSQL, Redis, `SECRET_KEY`, etc.)
-
-## Licença
-
-MIT
